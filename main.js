@@ -1,6 +1,8 @@
 const board = document.querySelector('.board');
 const selectionDiv = document.querySelector('.selection');
 
+let localStorageMemos = JSON.parse(localStorage.getItem('memos')) || [];
+
 
 let memoList = [];
 
@@ -77,3 +79,38 @@ class Memo{
         
     }
 }
+
+localStorageMemos.forEach(memo => {
+    let storedMemo = new Memo(
+        memo.id,
+        {left: memo.position.left, top: memo.position.top},
+        {width: memo.size.width, height: memo.size.height},
+        memo.content
+    )
+    memoList.push(storedMemo);
+})
+
+function updateLocalStorage(){  
+    if(localStorage.getItem('memos') != JSON.stringify(memoList)){
+        console.log('Local storage updated')
+        localStorage.setItem('memos', JSON.stringify(memoList)); 
+    } 
+};
+
+window.addEventListener('mousemove', (e) => {
+    for(let i = 0; i < memoList.length; i++){
+        if(memoList[i].moving){
+            memoList[i].moveMemo(e);
+        }
+
+        if(memoList[i].resizing){
+            memoList[i].resizeMemo(e)
+        }
+    }
+})
+
+window.addEventListener('mouseup', () => {
+    for(let i = 0; i< memoList.length; i++){
+        memoList[i].mouseUp();
+    }
+})
