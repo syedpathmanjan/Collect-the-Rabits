@@ -55,3 +55,35 @@ canvas {
   align-items: center;
   font-size: 20px;
 }
+
+.menu-container{
+  position: absolute;
+  color: white;
+}
+
+#wand {
+  position: fixed;
+  pointer-events: none;
+  font-size: 30px;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+}
+
+.sparkle {
+  position: fixed;
+  pointer-events: none;
+  font-size: 16px;
+  animation: fadeOut 1s forwards;
+  z-index: 999;
+}
+
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+}

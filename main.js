@@ -1,5 +1,6 @@
 const selectionDiv = document.querySelector(".selection");
 const board = document.querySelector(".board");
+const scoreElement = document.getElementById("score")
 
 
 let mouseClicked = false;
@@ -35,11 +36,41 @@ board.addEventListener("mouseup", (e) => {
 	let width = offsetXEnd - offsetXStart;
 	let height = offsetYEnd - offsetYStart;
 
+    const selectionRect = selectionDiv.getBoundingClientRect();
+
+    rabbits.forEach((rabbit, index) => {
+        const rabbitRect = rabbit.getBoundingClientRect();
+
+        const isIntersecting = !(
+            selectionRect.right < rabbitRect.left ||
+            selectionRect.left > rabbitRect.right ||
+            selectionRect.bottom < rabbitRect.top ||
+            selectionRect.top > rabbitRect.bottom
+        );
+
+        if (isIntersecting) {
+            rabbit.remove();
+            rabbits[index] = null;
+            score++;
+            console.log("Score:", score);
+            scoreElement.textContent = "Score: " + score;
+        }
+    });
+
+    for (let i = rabbits.length - 1; i >= 0; i--) {
+        if (rabbits[i] === null) rabbits.splice(i, 1);
+    }
+
+    if(score == 100){
+        timeElement.textContent = "Game Over";
+        clearInterval(timer); 
+    }
 
 	selectionDiv.style.width = '0px';
 	selectionDiv.style.height = '0px';
 	selectionDiv.style.display = 'none';
 	board.style.cursor = 'default';
+
 });
 
 board.addEventListener("mousemove", (e) => {
@@ -107,7 +138,56 @@ for (let i = 0; i < rabbitCount; i++) {
     createRabbit(i);
 }
 
-setInterval(() => {
+let rabbitInterval = setInterval(() => {
+    if(timeLeft == 0){
+        console.log("bl")
+    }
     rabbits.forEach(rabbit => moveRabbit(rabbit));
 }, 1000);
 
+let timeLeft = 5;
+let timer;
+let score = 0;
+
+
+
+const timeElement = document.getElementById("time")
+
+function startCountdown() {
+    clearInterval(timer); 
+    timeLeft = 5;
+    timer = setInterval(() => {
+        timeLeft--;
+        console.log("Time left:", timeLeft);
+        timeElement.textContent = "Time Left: " + timeLeft;
+        
+        if (timeLeft <= 0) {
+            clearInterval(timer);
+            console.log("Game Over");
+            clearInterval(rabbitInterval)
+            timeElement.textContent = "Game Over";
+            rabbits.forEach((rab) => rab.remove())
+        }
+    }, 1000);
+}
+
+const wand = document.getElementById('wand');
+
+document.addEventListener('mousemove', (e) => {
+    wand.style.left = e.clientX + 'px';
+    wand.style.top = e.clientY + 'px';
+
+    const sparkle = document.createElement('div');
+    sparkle.className = 'sparkle';
+    sparkle.textContent = '✨';
+    sparkle.style.left = `${e.clientX}px`;
+    sparkle.style.top = `${e.clientY}px`;
+
+    document.body.appendChild(sparkle);
+
+    setTimeout(() => {
+        sparkle.remove();
+    }, 1000);
+});
+
+startCountdown();
