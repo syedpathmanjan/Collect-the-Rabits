@@ -33,9 +33,6 @@ board.addEventListener("mouseup", (e) => {
 	offsetXEnd = e.offsetX;
 	offsetYEnd = e.offsetY;
 
-	let width = offsetXEnd - offsetXStart;
-	let height = offsetYEnd - offsetYStart;
-
     const selectionRect = selectionDiv.getBoundingClientRect();
 
     rabbits.forEach((rabbit, index) => {
@@ -190,4 +187,18 @@ document.addEventListener('mousemove', (e) => {
     }, 1000);
 });
 
-startCountdown();
+const startMenu = document.getElementById('start-menu');
+const startButton = document.getElementById('start-button');
+
+clearInterval(rabbitInterval);
+clearInterval(timer);
+
+startButton.addEventListener('click', () => {
+    startMenu.style.display = 'none';
+
+    rabbitInterval = setInterval(() => {
+        rabbits.forEach(rabbit => moveRabbit(rabbit));
+    }, 1000);
+
+    startCountdown();
+});
