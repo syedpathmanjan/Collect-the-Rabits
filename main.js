@@ -1,116 +1,113 @@
-const board = document.querySelector('.board');
-const selectionDiv = document.querySelector('.selection');
+const selectionDiv = document.querySelector(".selection");
+const board = document.querySelector(".board");
 
-let localStorageMemos = JSON.parse(localStorage.getItem('memos')) || [];
-
-
-let memoList = [];
 
 let mouseClicked = false;
 
 let movingMemo = false;
 
 let resizingMemo = false;
+
 let offsetXStart = 0;
 let offsetYStart = 0;
 let offsetXEnd = 0;
 let offsetYEnd = 0;
 
 let offsetYCurrent = 0;
-let offetXCurrent = 0;
+let offsetXCurrent = 0;
 
-board.addEventListener('mousedown', (e) => {
-    mouseClicked = true;
+board.addEventListener("mousedown", (e) => {
 
-    offsetXStart = e.offsetX;
-    offsetYStart = e.offsetY;
+	mouseClicked = true;
 
-    if(!movingMemo){
-        selectioRND_0v2txsH0nDiv.style.top = `${offsetYStart}px`;
-        selectionDiv.style.left = `${offsetXStart}px`;
-        selectionDiv.style.display = 'block';
-        board.style.cursor = 'crosshair';
-    }
-})
-    
-board.addEventListener('mouseup', (e) => {
-    mouseClicked = false;
-    offsetXEnd = e.offsetX;
-    offsetYEnd = e.offsetY;
-    
-    let width = offsetXEnd + offsetXStart;
-    let height = offsetYEnd - offsetYStart;
-
-    if(width >= 50 && height >= 50 && !movingMemo && !resizingMemo){
-        let memo = new Memo(
-            Date.now(),
-            {left: offsetXStart, top: offsetYStart},
-            {width, height},
-        );
-        memoList.push(memo);
-    }
-
-    selectionDiv.style.width = '0px';
-    selectionDiv.style.height = '0px';
-    selectionDiv.style.display = 'none';
-    board.style.cursor = 'default';
-})
-
-board.addEventListener('mousemove', (e) => {
-
-    if(mouseClicked && !movingMemo && !resizingMemo){
-        offsetXCurrent = e.offsetX - offsetXStart;
-        offsetYCurrent = e.offsetY - offsetYStart;
-        
-        selectionDiv.style.width = `${offsetXCurrent}px`;
-        selectionDiv.style.height = `${offsetYCurrent}px`;
-    } 
-})
+	offsetXStart = e.offsetX;
+	offsetYStart = e.offsetY;
 
 
-class Memo{
-    constructor(id, position, size){
-        this.id = id
-        this.position = position;
-        this.size = size;
-        this.moving = false 
-        this.resizing = false;
-        this.createMemo();
-        
-    }
+	selectionDiv.style.display = "block";
+});
+
+board.addEventListener("mouseup", (e) => {
+	mouseClicked = false;
+	offsetXEnd = e.offsetX;
+	offsetYEnd = e.offsetY;
+
+	let width = offsetXEnd - offsetXStart;
+	let height = offsetYEnd - offsetYStart;
+
+
+	selectionDiv.style.width = '0px';
+	selectionDiv.style.height = '0px';
+	selectionDiv.style.display = 'none';
+	board.style.cursor = 'default';
+});
+
+board.addEventListener("mousemove", (e) => {
+	if (mouseClicked && !movingMemo && !resizingMemo) {
+        if (e.offsetX - offsetXStart > 0 && e.offsetY - offsetYStart < 0){
+            offsetXCurrent = e.offsetX  - offsetXStart;
+			offsetYCurrent = offsetYStart -  e.offsetY;
+			selectionDiv.style.top = `${e.y}px`;
+			selectionDiv.style.bottom = `${offsetYStart}px`;
+			selectionDiv.style.right = `${e.x}px`;
+			selectionDiv.style.left = `${offsetXStart}px`;
+        }
+		else if (e.offsetX - offsetXStart < 0 && e.offsetY - offsetYStart > 0) {
+			offsetXCurrent = offsetXStart - e.offsetX;
+			offsetYCurrent = e.offsetY - offsetYStart;
+			selectionDiv.style.top = `${offsetYStart}px`;
+			selectionDiv.style.bottom = `${e.y}px`;
+			selectionDiv.style.right = `${offsetXStart}px`;
+			selectionDiv.style.left = `${e.x}px`;
+		} else if (e.offsetX - offsetXStart < 0) {
+			offsetXCurrent = offsetXStart - e.offsetX;
+			offsetYCurrent = offsetYStart - e.offsetY;
+			selectionDiv.style.top = `${e.y}px`;
+			selectionDiv.style.left = `${e.x}px`;
+			selectionDiv.style.bottom = `${offsetYStart}px`;
+			selectionDiv.style.right = `${offsetXStart}px`;
+		} else {
+			offsetXCurrent = e.offsetX - offsetXStart;
+			offsetYCurrent = e.offsetY - offsetYStart;
+			selectionDiv.style.top = `${offsetYStart}px`;
+			selectionDiv.style.left = `${offsetXStart}px`;
+		}
+		selectionDiv.style.width = `${offsetXCurrent}px`;
+		selectionDiv.style.height = `${offsetYCurrent}px`;
+	}
+});
+
+const container = document.getElementById('container');
+const rabbitCount = 100;
+const rabbits = [];
+
+function getRandomPosition() {
+    const x = Math.random() * (window.innerWidth - 50);
+    const y = Math.random() * (window.innerHeight - 50);
+    return { x, y };
 }
 
-localStorageMemos.forEach(memo => {
-    let storedMemo = new Memo(
-        memo.id,
-        {left: memo.position.left, top: memo.position.top},
-        {width: memo.size.width, height: memo.size.height},
-        memo.content
-    )
-    memoList.push(storedMemo);
-})
+function createRabbit(index) {
+    const rabbit = document.createElement('div');
+    rabbit.className = 'rabbit';
+    rabbit.textContent = '🐇';
+    container.appendChild(rabbit);
+    rabbits.push(rabbit);
 
-function updateLocalStorage(){  
-    if(localStorage.getItem('memos') != JSON.stringify(memoList)){
-        console.log('Local storage updated')
-        localStorage.setItem('memos', JSON.stringify(memoList)); 
-    } 
-};
+    const { x, y } = getRandomPosition();
+    rabbit.style.transform = `translate(${x}px, ${y}px)`;
+}
 
-window.addEventListener('mousemove', (e) => {
-    for(let i = 0; i < memoList.length; i++){
-        if(memoList[i].moving){
-            memoList[i].moveMemo(e);
-        }
+function moveRabbit(rabbit) {
+    const { x, y } = getRandomPosition();
+    rabbit.style.transform = `translate(${x}px, ${y}px)`;
+}
 
-        if(memoList[i].resizing){
-            memoList[i].resizeMemo(e)
-        }
-    }
-})
+for (let i = 0; i < rabbitCount; i++) {
+    createRabbit(i);
+}
 
-window.addEventListener('mouseup', () => {
-    for(let i = 0; i< memoList.length; i++){
-        memoList[i].mouseUp();
-    }
-})
+setInterval(() => {
+    rabbits.forEach(rabbit => moveRabbit(rabbit));
+}, 1000);
+
